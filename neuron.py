@@ -1,7 +1,5 @@
 import random
 
-
-
 class neuron:
     
     def __init__(self,num_inputs):
@@ -13,7 +11,15 @@ class neuron:
         return sum([(x*w) for w,x in zip(self.weights,input)]) + self.bias
     
     def __str__(self) -> str:
-        return "w: " + str(self.weights) + " b: " + str(self.bias)
+        return "w: " + str(self.weights) + " b: " + str(self.bias) + " g: " +str(self.grads)
     
-    def backward(self,gradient_above):
-        return 
+    def backward(self,input, gradient_above):
+        self.grads = [g+(i*gradient_above) for g,i in zip(self.grads,input)] + [self.grads[-1]+gradient_above]
+
+    def zero_grad(self):
+        self.grads = [0 for _ in self.grads]
+
+    def grad_descend(self,learning_rate):
+        self.weights=[w-g*learning_rate for w,g in zip(self.weights,self.grads)]
+        self.bias = self.bias - self.grads[-1]*learning_rate 
+

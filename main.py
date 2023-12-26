@@ -1,4 +1,4 @@
-from layer import layer
+from layer import layer, tanhLayer
 from neuron import neuron
 
 # inputs = [[1,2,3,4,5],[3,2,1,5,6],[8,8,8,8,8]]
@@ -89,5 +89,52 @@ def test3():
     # print(loss)
 
 def test4():
-    pass
+    inputs = [[0.37454012, 0.95071431, 0.73199394, 0.59865848, 0.15601864],
+        [0.15599452, 0.05808361, 0.86617615, 0.60111501, 0.70807258],
+        [0.02058449, 0.96990985, 0.83244264, 0.21233911, 0.18182497]]
+
+    expected_outputs = [[0,0],[0.5,0],[1,1]]
+    l1 = layer(5,2)
+    lt = tanhLayer(2)
+    l2 = layer(2,2)
+    outputs = [-1,-1,-1]
+    
+    for _ in range(20000):
+        for index,input in enumerate(inputs):
+            #forward pass
+            outputs[index] = l2(lt(l1(input)))
+            
+            #loss
+            derivs = [2*(o-e) for o,e in zip(outputs[index],expected_outputs[index])]
+            
+
+            #backward
+            l2.backward(derivs)
+            lt.backward(l2.get_grads())
+            l1.backward(lt.get_grads())
+
+        #descend
+        lr = 0.005
+        l2.descend(lr)
+        # lt.descend(lr)
+        l1.descend(lr)
+
+        #zero grad
+        l1.zero_grad()
+        lt.zero_grad()
+        l2.zero_grad()
+
+    print("Expected outputs: ")
+    for eo in expected_outputs:
+        print(eo)    
+    print("Actual outputs: ")
+    for i in inputs:
+        print((l2(lt(l1(i))))) 
+    print("Error: ")
+    for input,eo in zip(inputs,expected_outputs):
+        o = (l2(lt(l1(input))))
+        print([(x-y)**2 for x,y in zip(eo,o)])
+    
+        
+
 test4()

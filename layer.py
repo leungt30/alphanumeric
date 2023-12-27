@@ -37,6 +37,13 @@ class layer:
     def get_grads(self):
         return self.grads
     
+    def get_input_size(self):
+        return self.input_size
+    
+    def get_output_size(self):
+        return self.output_size
+
+    
 """
 Activation layer using tanh as the activation function. 
 
@@ -46,6 +53,7 @@ This is technically redudant since I can use the custom to create tanh but I wil
 class tanhLayer():
 
     def __init__(self,size):
+        self.size = size
         self.grads = [0 for _ in range(size)]
 
     def __call__(self, inputs):
@@ -65,12 +73,19 @@ class tanhLayer():
         return self.grads
 
 
+    def get_input_size(self):
+        return self.size
+    
+    def get_output_size(self):
+        return self.size
+
 #can be used to easily define other activation layers
 class customActivationLayer():
     def __init__(self,size,activationFn,activationFnDeriv):
         self.grads = [0 for _ in range(size)]
         self.fn = activationFn
         self.dfn = activationFnDeriv
+        self.size = size
     
     def __call__(self, inputs):
         self.prev_input = inputs
@@ -87,6 +102,12 @@ class customActivationLayer():
 
     def get_grads(self):
         return self.grads
+    
+    def get_input_size(self):
+        return self.size
+    
+    def get_output_size(self):
+        return self.size
 
 class reluLayer():
     def __init__(self,size):
@@ -95,23 +116,20 @@ class reluLayer():
 
         def relu_derivative(x):
             return 1 if x > 0 else 0
-
-        self.grads = [0 for _ in range(size)]
-        self.fn = relu
-        self.dfn = relu_derivative
+        
+        self.layer = customActivationLayer(size,relu,relu_derivative)
     
     def __call__(self, inputs):
-        self.prev_input = inputs
-        self.prev_output = [self.fn(input) for input in inputs]
-        return self.prev_output
+        return self.layer(inputs)
     
     def backward(self, derivs):
-        #since this layer doesn't have any neurons, I keep the gradients as a list and I will pass them on during back prop
-        #when combining with a dense layer, we will take the gradients that result from backwards, and use them as derivs for the previous dense layer 
-        self.grads = [current_grad+self.dfn(x)*deriv for x,deriv,current_grad in zip(self.prev_input,derivs,self.grads)]
+        self.layer(derivs)
     
     def zero_grad(self):
-        self.grads = [0 for _ in self.grads]
+        self.layer.zero_grad()
 
     def get_grads(self):
-        return self.grads
+        return self.layer.get_grads()
+
+    def get_output_size(self):
+        return self.layer.get_output_size()

@@ -1,5 +1,8 @@
 import math
+
+import numpy as np
 from layer import customActivationLayer, layer, reluLayer, tanhLayer
+from mlp import mlp
 from neuron import neuron
 
 # inputs = [[1,2,3,4,5],[3,2,1,5,6],[8,8,8,8,8]]
@@ -191,4 +194,17 @@ def test6():
     r.backward([1,2,1,1,1])
     print(r.get_grads())
 
-test6()
+def test7():
+    m = mlp(10,5)
+    inputs = [np.random.rand(10) for _ in range(20)]
+    # expected_outputs = [np.random.rand(5) for _ in range(20)]
+
+    m.addReluLayer(21)
+    m.addTanhLayer(15)
+    m.addReluLayer(25)
+
+    m.build()
+
+    print(m(inputs[0]))
+
+test7()

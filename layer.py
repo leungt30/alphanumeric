@@ -1,4 +1,6 @@
 import math
+
+import numpy as np
 from neuron import neuron
 
 
@@ -133,3 +135,13 @@ class reluLayer():
 
     def get_output_size(self):
         return self.layer.get_output_size()
+
+class sigmoidLayer(customActivationLayer):
+    def __init__(self, size):
+        def sigmoid(x):
+            return 1 / (1 + np.exp(-x))
+        def sigmoid_derivative(x):
+            sigmoid_x = sigmoid(x)
+            return sigmoid_x * (1-sigmoid_x)
+
+        super().__init__(size, sigmoid, sigmoid_derivative)

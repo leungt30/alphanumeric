@@ -1,4 +1,5 @@
 import math
+from typing import List
 
 import numpy as np
 from neuron import neuron
@@ -111,7 +112,7 @@ class customActivationLayer():
     def get_output_size(self):
         return self.size
 
-class reluLayer():
+class reluLayer(customActivationLayer):
     def __init__(self,size):
         def relu(x):
             return max(0, x)
@@ -119,22 +120,22 @@ class reluLayer():
         def relu_derivative(x):
             return 1 if x > 0 else 0
         
-        self.layer = customActivationLayer(size,relu,relu_derivative)
+        super().__init__(size,relu,relu_derivative)
     
-    def __call__(self, inputs):
-        return self.layer(inputs)
+    # def __call__(self, inputs):
+    #     return self.layer(inputs)
     
-    def backward(self, derivs):
-        self.layer(derivs)
+    # def backward(self, derivs):
+    #     self.layer(derivs)
     
-    def zero_grad(self):
-        self.layer.zero_grad()
+    # def zero_grad(self):
+    #     self.layer.zero_grad()
 
-    def get_grads(self):
-        return self.layer.get_grads()
+    # def get_grads(self):
+    #     return self.layer.get_grads()
 
-    def get_output_size(self):
-        return self.layer.get_output_size()
+    # def get_output_size(self):
+    #     return self.layer.get_output_size()
 
 class sigmoidLayer(customActivationLayer):
     def __init__(self, size):
@@ -145,3 +146,32 @@ class sigmoidLayer(customActivationLayer):
             return sigmoid_x * (1-sigmoid_x)
 
         super().__init__(size, sigmoid, sigmoid_derivative)
+
+class leakyReluLayer(customActivationLayer):
+    def __init__(self, size, leak):
+        self.leak = leak
+        def leaky_relu(x):
+            return x if x > 0 else leak * x
+
+        def leaky_relu_derivative(x):
+            return 1 if x > 0 else leak 
+
+        super().__init__(size, leaky_relu, leaky_relu_derivative)
+
+
+
+class softmaxLayer(customActivationLayer):
+    def __init__(self, size, leak):
+        self.leak = leak
+        def softmax(x:List[float]):
+            return x if x > 0 else leak * x
+
+        def softmax_deriv(x):
+            return 1 if x > 0 else leak 
+
+        super().__init__(size, softmax, softmax_deriv)
+    
+    def __call__(self,xs:List[float]):
+        maxElem = max(xs)
+        for x,grad in zip(xs,super().grads):
+            grad += x/maxElem

@@ -1,5 +1,5 @@
 from typing import List
-from layer import customActivationLayer, layer, reluLayer, sigmoidLayer, tanhLayer
+from layer import customActivationLayer, layer, reluLayer, sigmoidLayer, softmaxLayer, tanhLayer
 
 
 class mlp:
@@ -33,6 +33,12 @@ class mlp:
         input_size = self.layers[-1].get_output_size()
         newLayer = layer(input_size,size)
         newActivationLayer = sigmoidLayer(size)
+        self.layers.extend([newLayer,newActivationLayer])
+
+    def addSoftMaxLayer(self,size:int):
+        input_size = self.layers[-1].get_output_size()
+        newLayer = layer(input_size,size)
+        newActivationLayer = softmaxLayer(size)
         self.layers.extend([newLayer,newActivationLayer])
 
     def build(self):

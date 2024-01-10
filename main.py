@@ -221,11 +221,10 @@ def test7():
 
     expected_outputs = [[x**2 for x in input] for input in inputs]
     # print(inputs)
-    m.addReluLayer(50)
-    m.addTanhLayer(50)
-    m.addSigLayer(90)
-    m.addReluLayer(50)
-    m.addTanhLayer(50)
+    m.addReluLayer(20)
+    m.addTanhLayer(20)
+    m.addSigLayer(30)
+    m.addSoftMaxLayer(30)
     m.build()
 
     # print(m(inputs[0]))
@@ -239,11 +238,11 @@ def test7():
         print(sum([(i-o)**2 for i,o in zip(m(input),output)])/10)
 
 def t():
-    lr = softmaxLayer(5,0.5)
-    o = lr([1,2,3,-4,-5])
+    lr = softmaxLayer(4)
+    o = lr([1,2,3,4])
     print(o)
-    # lr.backward([1,1,1,1,1])
-    # print(lr.get_grads())
+    lr.backward([1,1,1,1])
+    print(lr.get_grads())
     
-# test7()
-t()
+test7()
+# t()

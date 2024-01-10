@@ -160,18 +160,30 @@ class leakyReluLayer(customActivationLayer):
 
 
 
-class softmaxLayer(customActivationLayer):
-    def __init__(self, size, leak):
-        self.leak = leak
-        def softmax(x:List[float]):
-            return x if x > 0 else leak * x
+class softmaxLayer():
+    def __init__(self, size):
+        self.grads = [0 for _ in range(size)]
+        self.size = size
 
-        def softmax_deriv(x):
-            return 1 if x > 0 else leak 
+    def __call__(self,input:List[float]):
+        self.prev_input = input
+        pow_input = [math.exp(x) for x in input]
+        divisor = sum(pow_input)
+        
+        self.prev_output = [elem/divisor for elem in pow_input]
+        return self.prev_output
+        
+    def backward(self,derivs):
+        self.grads = [current_grad+(x*(1-x))*deriv for current_grad,deriv,x  in zip(self.grads,derivs,self.prev_output)]
 
-        super().__init__(size, softmax, softmax_deriv)
+    def zero_grad(self):
+        self.grads = [0 for _ in self.grads]
+
+    def get_grads(self):
+        return self.grads
     
-    def __call__(self,xs:List[float]):
-        maxElem = max(xs)
-        for x,grad in zip(xs,super().grads):
-            grad += x/maxElem
+    def get_input_size(self):
+        return self.size
+    
+    def get_output_size(self):
+        return self.size

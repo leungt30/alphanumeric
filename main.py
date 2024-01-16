@@ -23,7 +23,9 @@ nn.optimize_MSE(inputs,y_train,0.001,100)
 
 df_test = pd.read_csv("data/mnist_test.csv")
 y_test = df_test["label"]
+y_test = [label_to_output(y) for y in y_test]
 x_test = df_test.values
+
 
 mse = 0
 

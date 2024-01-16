@@ -62,11 +62,11 @@ class mlp:
                 theLayer.descend(learning_rate)
 
 
-    def optimize_MSE(self,inputs,expected_outputs,learning_rate,iterations,margin):
+    def optimize_MSE(self,inputs,expected_outputs,learning_rate,iterations):
         
         for i in range(iterations):
-            if i%1000 == 0:
-                print(i)
+            # if i%1000 == 0:
+            print(i)
             # mse = float(0)
             for index,input in enumerate(inputs):
                 

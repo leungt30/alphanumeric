@@ -1,5 +1,3 @@
-import math
-
 import numpy as np
 from neuron import neuron
 
@@ -9,7 +7,7 @@ class layer:
     def __init__(self,num_inputs, num_outputs):
         self.input_size = num_inputs
         self.output_size = num_outputs
-        self.grads = np.array([0.0 for _ in range(num_inputs)])
+        self.grads = np.zeros(num_inputs)
         self.neurons=[neuron(num_inputs) for _ in range(num_outputs)]
 
     def __call__(self,inputs:np.ndarray):
@@ -26,7 +24,8 @@ class layer:
         #calculate gradient with respect to each input. Used to pass gradients through layers
         neuron_grads = np.array([neuron.grads for neuron in self.neurons])
         
-        self.grads = np.array([sum(x) for x in zip(*neuron_grads)])
+        self.grads = np.array([sum(x) for x in zip(*neuron_grads)]) #SLOW
+        self.grads = np.array([sum(x) for x in zip(*neuron_grads)]) #SLOW
         
     
     def descend(self, learning_rate):
@@ -57,7 +56,7 @@ class tanhLayer():
 
     def __init__(self,size):
         self.size = size
-        self.grads = np.array([0.0 for _ in range(size)])
+        self.grads = np.zeros(size)
 
     def __call__(self, inputs:np.ndarray):
         self.prev_input = inputs
@@ -87,7 +86,7 @@ class tanhLayer():
 #can be used to easily define other activation layers
 class customActivationLayer():
     def __init__(self,size,activationFn,activationFnDeriv):
-        self.grads = np.array([0.0 for _ in range(size)])
+        self.grads = np.zeros(size)
         self.fn = activationFn
         self.dfn = activationFnDeriv
         self.size = size
@@ -183,7 +182,7 @@ class leakyReluLayer(customActivationLayer):
 
 class softmaxLayer():
     def __init__(self, size):
-        self.grads = np.array([0.0 for _ in range(size)])
+        self.grads = np.zeros(size)
         self.size = size
 
     def __call__(self,input:np.ndarray):

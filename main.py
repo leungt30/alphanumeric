@@ -2,7 +2,7 @@
 import pandas as pd
 from mlp import mlp
 import numpy as np
-
+from tqdm import tqdm
 def label_to_output(label):
     return [1 if i == label else 0 for i in range(10)]
 

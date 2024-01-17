@@ -1,4 +1,6 @@
 from typing import List
+
+from tqdm import tqdm
 from layer import customActivationLayer, layer, reluLayer, sigmoidLayer, softmaxLayer, tanhLayer
 
 
@@ -68,7 +70,7 @@ class mlp:
             # if i%1000 == 0:
             print(i)
             # mse = float(0)
-            for index,input in enumerate(inputs):
+            for index,input in enumerate(tqdm(inputs)):
                 
                 #forward pass
                 output = self(input)

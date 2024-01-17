@@ -94,7 +94,8 @@ class customActivationLayer():
     
     def __call__(self, inputs:np.ndarray):
         self.prev_input = inputs
-        self.prev_output = np.array([self.fn(input) for input in inputs])
+        # self.prev_output = np.array([self.fn(input) for input in inputs])
+        self.prev_output = self.fn(inputs)
         return self.prev_output
     
     def backward(self, derivs:np.ndarray):
@@ -117,11 +118,18 @@ class customActivationLayer():
 
 class reluLayer(customActivationLayer):
     def __init__(self,size):
-        def relu(x):
-            return max(0, x)
 
-        def relu_derivative(x):
+        def single_relu(x):
+            return np.maximum(0, x)
+
+        def relu(x:np.ndarray):
+            return np.vectorize(single_relu)(x)
+
+        def single_relu_derivative(x):
             return 1 if x > 0.0 else 0.0
+        
+        def relu_derivative(x:np.ndarray):
+            return np.vectorize(single_relu_derivative)(x) #uses np to iterate over all elements
         
         super().__init__(size,relu,relu_derivative)
     
@@ -142,9 +150,13 @@ class reluLayer(customActivationLayer):
 
 class sigmoidLayer(customActivationLayer):
     def __init__(self, size):
-        def sigmoid(x):
+        def single_sigmoid(x):
             return 1 / (1 + np.exp(-x))
-        def sigmoid_derivative(x):
+        
+        def sigmoid(x:np.ndarray):
+            return np.vectorize(single_sigmoid)(x)
+        
+        def sigmoid_derivative(x:np.ndarray):
             sigmoid_x = sigmoid(x)
             return sigmoid_x * (1-sigmoid_x)
 
@@ -153,11 +165,17 @@ class sigmoidLayer(customActivationLayer):
 class leakyReluLayer(customActivationLayer):
     def __init__(self, size, leak):
         self.leak = leak
-        def leaky_relu(x):
-            return x if x > 0 else leak * x
+        def single_leaky_relu(x):
+            return x if x > 0.0 else leak * x
 
-        def leaky_relu_derivative(x):
-            return 1 if x > 0 else leak 
+        def leaky_relu(x:np.ndarray):
+            return np.vectorize(single_leaky_relu)(x)
+
+        def single_leaky_relu_derivative(x):
+            return 1 if x > 0.0 else leak 
+        
+        def leaky_relu_derivative(x:np.ndarray):
+            return np.vectorize(single_leaky_relu_derivative)(x)
 
         super().__init__(size, leaky_relu, leaky_relu_derivative)
 
@@ -165,7 +183,7 @@ class leakyReluLayer(customActivationLayer):
 
 class softmaxLayer():
     def __init__(self, size):
-        self.grads = np.array([0 for _ in range(size)])
+        self.grads = np.array([0.0 for _ in range(size)])
         self.size = size
 
     def __call__(self,input:np.ndarray):
@@ -176,7 +194,7 @@ class softmaxLayer():
         self.prev_output = pow_input/divisor
         return self.prev_output
         
-    def backward(self,derivs):
+    def backward(self,derivs:np.ndarray):
         # self.grads = [current_grad+(x*(1-x))*deriv for current_grad,deriv,x  in zip(self.grads,derivs,self.prev_output)]
         self.grads += ((self.prev_output)*(1-self.prev_output)) * derivs
 

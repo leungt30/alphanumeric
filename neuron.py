@@ -7,7 +7,7 @@ class neuron:
     def __init__(self,num_inputs):
         self.weights = np.random.rand(num_inputs) #initialize with random weights
         self.bias = 0.0
-        self.grads = np.array([0 for _ in range(num_inputs)]) 
+        self.grads = np.array([0.0 for _ in range(num_inputs)]) 
         self.bias_grad = 0.0
     
     def __call__(self, input): #used for forward pass
@@ -19,8 +19,13 @@ class neuron:
     
     def backward(self,input:np.ndarray, gradient_above):
         # self.grads = [g+(i*gradient_above) for g,i in zip(self.grads,input)]+ ([self.grads[-1]+gradient_above])
+        
         self.grads += input * gradient_above
         self.bias_grad += gradient_above
+  
+
+
+
 
     def zero_grad(self):
         self.grads.fill(0.0)

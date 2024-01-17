@@ -35,7 +35,7 @@ mse = 0
 
 for x,y in zip(x_test,y_test):
     output = nn(x)
-    mse += (output - y)**2
+    mse += np.sum((output - y)**2)
 
 
 print(mse / len(x_test))

@@ -1,5 +1,4 @@
 import math
-from typing import List
 
 import numpy as np
 from neuron import neuron
@@ -10,23 +9,24 @@ class layer:
     def __init__(self,num_inputs, num_outputs):
         self.input_size = num_inputs
         self.output_size = num_outputs
-        self.grads = [0 for _ in range(num_inputs)]
+        self.grads = np.array([0.0 for _ in range(num_inputs)])
         self.neurons=[neuron(num_inputs) for _ in range(num_outputs)]
 
-    def __call__(self,inputs):
+    def __call__(self,inputs:np.ndarray):
         self.prev_inputs = inputs
-        self.prev_output = [neuron(inputs) for neuron in self.neurons]
+        self.prev_output = np.array([neuron(inputs) for neuron in self.neurons])
         return self.prev_output
     
-    def backward(self,derivs):
+    def backward(self,derivs:np.ndarray):
         #note derivs is a list of derivatives
 
         for neuron,deriv in zip(self.neurons,derivs):
             neuron.backward(self.prev_inputs,deriv) #use backward on each node 
 
         #calculate gradient with respect to each input. Used to pass gradients through layers
-        neuron_grads = [neuron.grads for neuron in self.neurons]
-        self.grads = [sum(x) for x in zip(*neuron_grads)]
+        neuron_grads = np.array([neuron.grads for neuron in self.neurons])
+        
+        self.grads = np.array([sum(x) for x in zip(*neuron_grads)])
         
     
     def descend(self, learning_rate):
@@ -57,20 +57,22 @@ class tanhLayer():
 
     def __init__(self,size):
         self.size = size
-        self.grads = [0 for _ in range(size)]
+        self.grads = np.array([0.0 for _ in range(size)])
 
-    def __call__(self, inputs):
+    def __call__(self, inputs:np.ndarray):
         self.prev_input = inputs
-        self.prev_output = [math.tanh(input) for input in inputs]
+        # self.prev_output = [math.tanh(input) for input in inputs]
+        self.prev_output = np.tanh(inputs)
         return self.prev_output
 
-    def backward(self, derivs):
+    def backward(self, derivs:np.ndarray):
         #since this layer doesn't have any neurons, I keep the gradients as a list and I will pass them on during back prop
         #when combining with a dense layer, we will take the gradients that result from backwards, and use them as derivs for the previous dense layer 
-        self.grads = [current_grad+(1-tanhx**2)*deriv for tanhx,deriv,current_grad in zip(self.prev_output,derivs,self.grads)]
-        
+        # self.grads = [current_grad+(1-tanhx**2)*deriv for tanhx,deriv,current_grad in zip(self.prev_output,derivs,self.grads)]
+        self.grads = self.grads + (1 - self.prev_output**2) * derivs
+
     def zero_grad(self):
-        self.grads = [0 for _ in self.grads]
+        self.grads.fill(0)
     
     def get_grads(self):
         return self.grads
@@ -85,23 +87,24 @@ class tanhLayer():
 #can be used to easily define other activation layers
 class customActivationLayer():
     def __init__(self,size,activationFn,activationFnDeriv):
-        self.grads = [0 for _ in range(size)]
+        self.grads = np.array([0.0 for _ in range(size)])
         self.fn = activationFn
         self.dfn = activationFnDeriv
         self.size = size
     
-    def __call__(self, inputs):
+    def __call__(self, inputs:np.ndarray):
         self.prev_input = inputs
-        self.prev_output = [self.fn(input) for input in inputs]
+        self.prev_output = np.array([self.fn(input) for input in inputs])
         return self.prev_output
     
-    def backward(self, derivs):
+    def backward(self, derivs:np.ndarray):
         #since this layer doesn't have any neurons, I keep the gradients as a list and I will pass them on during back prop
         #when combining with a dense layer, we will take the gradients that result from backwards, and use them as derivs for the previous dense layer 
-        self.grads = [current_grad+self.dfn(x)*deriv for x,deriv,current_grad in zip(self.prev_input,derivs,self.grads)]
+        # self.grads = [current_grad+self.dfn(x)*deriv for x,deriv,current_grad in zip(self.prev_input,derivs,self.grads)]
+        self.grads += self.dfn(self.prev_input) * derivs
     
     def zero_grad(self):
-        self.grads = [0 for _ in self.grads]
+        self.grads.fill(0)
 
     def get_grads(self):
         return self.grads
@@ -118,7 +121,7 @@ class reluLayer(customActivationLayer):
             return max(0, x)
 
         def relu_derivative(x):
-            return 1 if x > 0 else 0
+            return 1 if x > 0.0 else 0.0
         
         super().__init__(size,relu,relu_derivative)
     
@@ -162,22 +165,24 @@ class leakyReluLayer(customActivationLayer):
 
 class softmaxLayer():
     def __init__(self, size):
-        self.grads = [0 for _ in range(size)]
+        self.grads = np.array([0 for _ in range(size)])
         self.size = size
 
-    def __call__(self,input:List[float]):
+    def __call__(self,input:np.ndarray):
         self.prev_input = input
-        pow_input = [math.exp(x) for x in input]
-        divisor = sum(pow_input)
+        pow_input = np.exp(input)
+        divisor = np.sum(pow_input)
         
-        self.prev_output = [elem/divisor for elem in pow_input]
+        self.prev_output = pow_input/divisor
         return self.prev_output
         
     def backward(self,derivs):
-        self.grads = [current_grad+(x*(1-x))*deriv for current_grad,deriv,x  in zip(self.grads,derivs,self.prev_output)]
+        # self.grads = [current_grad+(x*(1-x))*deriv for current_grad,deriv,x  in zip(self.grads,derivs,self.prev_output)]
+        self.grads += ((self.prev_output)*(1-self.prev_output)) * derivs
 
     def zero_grad(self):
-        self.grads = [0 for _ in self.grads]
+        # self.grads = [0 for _ in self.grads]
+        self.grads.fill(0.0)
 
     def get_grads(self):
         return self.grads

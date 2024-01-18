@@ -1,7 +1,7 @@
 from typing import List
 
 from tqdm import tqdm
-from layer import customActivationLayer, layer, reluLayer, sigmoidLayer, softmaxLayer, tanhLayer
+from layer import customActivationLayer, layer, leakyReluLayer, reluLayer, sigmoidLayer, softmaxLayer, tanhLayer
 
 
 class mlp:
@@ -23,6 +23,12 @@ class mlp:
         input_size = self.layers[-1].get_output_size()
         newLayer = layer(input_size,size)
         newActivationLayer = reluLayer(size)
+        self.layers.extend([newLayer,newActivationLayer])
+
+    def addLeakyReluLayer(self,size:int,leak):
+        input_size = self.layers[-1].get_output_size()
+        newLayer = layer(input_size,size)
+        newActivationLayer = leakyReluLayer(size,leak)
         self.layers.extend([newLayer,newActivationLayer])
 
     def addTanhLayer(self,size:int):

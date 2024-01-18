@@ -11,18 +11,22 @@ nn = mlp(784,10)
 
 df = pd.read_csv("data/mnist_train.csv")
 y_train = df["label"]
-inputs = df.drop("label",axis=1).values
+
+upto = 100
+inputs = df.drop("label",axis=1).values[:upto]
 
 
 
-y_train = np.array([label_to_output(y) for y in y_train])
-nn.addSigLayer(50)
-nn.addReluLayer(25)
-nn.addTanhLayer(50)
+
+
+y_train = np.array([label_to_output(y) for y in y_train])[:upto]
+nn.addSigLayer(100)
+# nn.addLeakyReluLayer(25,0.1)
+# nn.addTanhLayer(50)
 nn.addSoftMaxLayer(10)
 nn.build()
 
-nn.optimize_MSE(inputs,y_train,0.001,100)
+nn.optimize_MSE(inputs,y_train,0.005,100)
 
 df_test = pd.read_csv("data/mnist_test.csv")
 y_test = df_test["label"]

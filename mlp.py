@@ -78,7 +78,8 @@ class mlp:
             print(i)
             mse = float(0)
             for index,input in enumerate(tqdm(inputs)):
-                
+                if index%10 == 0:
+                    print(mse/index)
                 #forward pass
                 output = self(input)
                 #loss using MSE 

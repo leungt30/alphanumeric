@@ -77,25 +77,25 @@ class mlp:
             # if i%1000 == 0:
             print(i)
             mse = float(0)
-            for index,input in enumerate(tqdm(inputs)):
-                if index%10 == 0:
-                    print(mse/index)
+            for index,input in enumerate(pbar:=tqdm(inputs)):
+                
                 #forward pass
                 output = self(input)
                 #loss using MSE 
                 # mse += sum([(e-o)**2 for o,e in zip(output,expected_outputs[index])])
-                mse += np.sum(np.power(expected_outputs[index] - output,2))
+                curr_loss =  np.sum(np.power(expected_outputs[index] - output,2))
                 # loss_derivs = [2*(o-e) for o,e in zip(output,expected_outputs[index])]
                 loss_derivs = 2 * (output * expected_outputs[index])
+
+                if index%10 == 0:
+                    # pbar.set_description(f"Current Loss: {curr_loss} | Label: {expected_outputs[index]} | Pred: {output}")
+                    pbar.set_description(f"Current Loss: {curr_loss}")
                 
                 #backward pass
+                self.zero_grad()
                 self.backward(loss_derivs)
-            mse = mse / len(inputs)
-            # if (mse <= margin):
-            #     return
 
-            self.descend(learning_rate)
-            self.zero_grad()
+                self.descend(learning_rate)
 
 
 

@@ -1,8 +1,10 @@
 import numpy as np
 from neuron import neuron
 
-
-class layer:
+"""
+original implementation of layer. simply stored a bunch of neurons in a list and iterated over them for most functions
+"""
+class OLDlayer:
 
     def __init__(self,num_inputs, num_outputs):
         self.input_size = num_inputs
@@ -24,7 +26,7 @@ class layer:
         #calculate gradient with respect to each input. Used to pass gradients through layers
         neuron_grads = np.array([neuron.grads for neuron in self.neurons])
         
-        self.grads = np.array([sum(x) for x in zip(*neuron_grads)]) #SLOW
+        # self.grads = np.array([sum(x) for x in zip(*neuron_grads)]) #SLOW
         self.grads = np.array([sum(x) for x in zip(*neuron_grads)]) #SLOW
         
     
@@ -45,7 +47,59 @@ class layer:
     def get_output_size(self):
         return self.output_size
 
+"""
+using a matrix to store the weights of each neuron instead of holding each neuron in a list.
+"""
+class layer:
+
+    def __init__(self,num_inputs, num_outputs):
+        self.input_size = num_inputs
+        self.output_size = num_outputs
+        self.grads = np.zeros(num_inputs)
+        self.bias_grad = np.zeros(num_outputs)
+        self.neurons_grads = np.zeros((num_outputs,num_inputs)) 
+        # self.neurons=[neuron(num_inputs) for _ in range(num_outputs)]
+        self.neurons_weights = np.random.random((num_outputs,num_inputs)) 
+        self.neurons_biases = np.random.random((num_outputs))
+
+    def __call__(self,inputs:np.ndarray):
+        self.prev_inputs = inputs
+        self.prev_output = np.matmul(self.neurons_weights,inputs) + self.neurons_biases
+        return self.prev_output
     
+    def backward(self,derivs:np.ndarray):   
+        #reminder: this grad is wrt input values, used for back prop on other layers
+        self.grads += np.matmul(derivs,self.neurons_weights)
+
+        self.neurons_grads += self.__vector_multiply(derivs,self.prev_inputs)
+        
+        
+        self.bias_grad += derivs
+
+    def __vector_multiply(self,x,y):
+        a = x.reshape((-1,1))
+        b = y.reshape((1,-1))
+        return a@b
+        
+    
+    def descend(self, learning_rate:float):
+        self.neurons_weights -= self.neurons_grads*learning_rate
+        self.neurons_biases -= self.bias_grad*learning_rate
+
+    def zero_grad(self):
+        self.bias_grad.fill(0)
+        self.neurons_grads.fill(0)
+        self.grads.fill(0)
+
+    def get_grads(self):
+        return self.grads
+    
+    def get_input_size(self):
+        return self.input_size
+    
+    def get_output_size(self):
+        return self.output_size
+
 """
 Activation layer using tanh as the activation function. 
 

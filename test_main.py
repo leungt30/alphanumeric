@@ -64,16 +64,16 @@ def test2():
 
 def test3():
     #defining desired resutls
-    inputs = [[5.0,2.3,0.1,2,-1],[5.1,5.3,1.1,2.9,-1]]
-    expected = [-7.0,13.13]
-
+    inputs = np.array([[5.0,2.3,0.1,2,-1],[5.1,5.3,1.1,2.9,-1]])
+    expected = np.array([-7.0, 13.13])
+    learning_rate = 0.0015
     #defining layer
     l = layer(5,2)
     for input in inputs:
         print("initial: " + str(l(input))) 
         print("initial MSE: " + str(sum((o-e)**2 for o,e in zip(l(input),expected))))
 
-    for _ in range(500):
+    for _ in range(5000):
         for input in inputs:
             #forward pass
             out = l(input)
@@ -82,10 +82,11 @@ def test3():
             # loss = sum((o-e)**2 for o,e in zip(out,expected)) #MSE
 
             #calculate gradients
-            derivs = (2*(o-e) for o,e in zip(out,expected)) #derivs for MSE
+            # derivs = (2*(o-e) for o,e in zip(out,expected)) #derivs for MSE
+            derivs = 2*(out-expected) #derivs for MSE
             l.backward(derivs)
         #decend gradient after backward pass of all inputs 
-        l.descend(0.005)
+        l.descend(learning_rate)
         #zero gradients
         l.zero_grad()
     for input in inputs:
@@ -139,7 +140,6 @@ def test4():
         o = (l2(lt(l1(input))))
         print([(x-y)**2 for x,y in zip(eo,o)])
     
-
 def test5():
     inputs = [[0.37454012, 0.95071431, 0.73199394, 0.59865848, 0.15601864],
         [0.15599452, 0.05808361, 0.86617615, 0.60111501, 0.70807258],
@@ -186,8 +186,6 @@ def test5():
     for input,eo in zip(inputs,expected_outputs):
         o = (l2(lt(l1(input))))
         print([(x-y)**2 for x,y in zip(eo,o)])
-        
-
 def test6():
     r = reluLayer(5)
     print(r([1,2,3,4,-5]))
@@ -244,5 +242,9 @@ def t():
     lr.backward([1,1,1,1])
     print(lr.get_grads())
     
-test7()
+test3()
 # t()
+
+# x=np.random.random((5,2))
+# x.fill(0)
+# print(x)

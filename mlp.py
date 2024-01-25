@@ -1,4 +1,5 @@
 from typing import List
+import numpy as np
 
 from tqdm import tqdm
 from layer import customActivationLayer, layer, leakyReluLayer, reluLayer, sigmoidLayer, softmaxLayer, tanhLayer
@@ -75,17 +76,20 @@ class mlp:
         for i in range(iterations):
             # if i%1000 == 0:
             print(i)
-            # mse = float(0)
+            mse = float(0)
             for index,input in enumerate(tqdm(inputs)):
                 
                 #forward pass
                 output = self(input)
                 #loss using MSE 
                 # mse += sum([(e-o)**2 for o,e in zip(output,expected_outputs[index])])
-                loss_derivs = [2*(o-e) for o,e in zip(output,expected_outputs[index])]
+                mse += np.sum(np.power(expected_outputs[index] - output,2))
+                # loss_derivs = [2*(o-e) for o,e in zip(output,expected_outputs[index])]
+                loss_derivs = 2 * (output * expected_outputs[index])
+                
                 #backward pass
                 self.backward(loss_derivs)
-            # mse = mse / len(inputs)
+            mse = mse / len(inputs)
             # if (mse <= margin):
             #     return
 

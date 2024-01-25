@@ -13,7 +13,7 @@ df = pd.read_csv("data/mnist_train.csv")
 y_train = df["label"]
 
 upto = 50000
-inputs = df.drop("label",axis=1).values[:upto] / 255.0
+inputs = df.drop("label",axis=1).values[:upto] / 255.0 # preprocess data
 
 
 

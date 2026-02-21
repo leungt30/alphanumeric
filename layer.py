@@ -247,9 +247,14 @@ class softmaxLayer():
         self.prev_output = pow_input/divisor
         return self.prev_output
         
-    def backward(self,derivs:np.ndarray):
-        # self.grads = [current_grad+(x*(1-x))*deriv for current_grad,deriv,x  in zip(self.grads,derivs,self.prev_output)]
-        self.grads += ((self.prev_output)*(1-self.prev_output)) * derivs
+    def backward(self,derivs:np.ndarray): # still unsure of this
+        # Calculate the softmax derivative with respect to the inputs
+        softmax_derivative = np.diag(self.prev_output) - np.outer(self.prev_output, self.prev_output)
+
+        # Update the gradients using the chain rule
+        self.grads = np.dot(derivs, softmax_derivative)
+
+        return self.grads
 
     def zero_grad(self):
         # self.grads = [0 for _ in self.grads]

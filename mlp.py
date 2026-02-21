@@ -89,7 +89,7 @@ class mlp:
 
                 if index%10 == 0:
                     # pbar.set_description(f"Current Loss: {curr_loss} | Label: {expected_outputs[index]} | Pred: {output}")
-                    pbar.set_description(f"Current Loss: {curr_loss}")
+                    pbar.set_description(f"CL: {curr_loss} | P: {output}")
                 
                 #backward pass
                 self.zero_grad()

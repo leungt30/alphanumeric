@@ -1,7 +1,7 @@
 import math
 
 import numpy as np
-from layer import customActivationLayer, layer, leakyReluLayer, reluLayer, softmaxLayer, tanhLayer
+from layer import customActivationLayer, layer, leakyReluLayer, reluLayer, sigmoidLayer, softmaxLayer, tanhLayer
 from mlp import mlp
 from neuron import neuron
 
@@ -242,9 +242,20 @@ def t():
     lr.backward([1,1,1,1])
     print(lr.get_grads())
     
-test3()
+# test3()
 # t()
 
 # x=np.random.random((5,2))
 # x.fill(0)
 # print(x)
+    
+def test8():
+    x = sigmoidLayer(10)
+    def sigmoid(x):
+        return 1/(1+np.exp(-x))
+    
+    i = np.array([-100,-10,0,10,100])
+    expected = np.array([sigmoid(x) for x in i])
+    actual = x(i)
+    print((actual-expected))
+test8()
